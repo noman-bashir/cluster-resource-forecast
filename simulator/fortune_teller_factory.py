@@ -1,5 +1,4 @@
-# from simulator.oracle import Oracle
-from oracle import Oracle
+from simulator.oracle import Oracle
 
 
 def FortuneTellerFactory(config):

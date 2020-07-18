@@ -1,4 +1,4 @@
-from predictor import StatefulPredictor
+from simulator.predictor import StatefulPredictor
 
 
 class _State:

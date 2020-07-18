@@ -3,8 +3,7 @@ import apache_beam as beam
 import numpy as np
 from collections import deque
 from typing import List
-# from simulator.fortune_teller_factory import FortuneTellerFactory
-from fortune_teller_factory import FortuneTellerFactory
+from simulator.fortune_teller_factory import FortuneTellerFactory
 import sys
 import json
 
@@ -157,10 +156,10 @@ def CallFortuneTellerRunner(data, config):
         _SortBySimulatedTime()
     )
 
-    # results_schema_without_samples_file = open(
-    #     "simulator/results_schema_without_samples.json"
-    # )
-    # results_schema_without_samples = json.load(results_schema_without_samples_file)
+    results_schema_without_samples_file = open(
+        "simulator/results_schema_without_samples.json"
+    )
+    results_schema_without_samples = json.load(results_schema_without_samples_file)
     for fortune_teller_config in config.fortune_teller:
 
         simulation_results = sorted_data | "Calling Fortune Teller Runner For {}".format(
@@ -175,28 +174,22 @@ def CallFortuneTellerRunner(data, config):
             lambda elements: elements
         )
 
-        # unpacked_simulation_results | "Printing simulation results for {}".format(
-        #     fortune_teller_config.name
-        # ) >> beam.Map(print)
+        simulation_result_dataset = config.simulation_result.dataset
+        simulation_result_table = (
+            config.simulation_result.table
+            if config.simulation_result.HasField("table")
+            else fortune_teller_config.name
+        )
 
-        return unpacked_simulation_results
-
-        # simulation_result_dataset = config.simulation_result.dataset
-        # simulation_result_table = (
-        #     config.simulation_result.table
-        #     if config.simulation_result.HasField("table")
-        #     else fortune_teller_config.name
-        # )
-
-        # if fortune_teller_config.save_samples == True:
-        #     # TODO: add support for saving samples
-        #     pass
-        # else:
-        #     unpacked_simulation_results | "Save {} results to BQ table".format(
-        #         fortune_teller_config.name
-        #     ) >> beam.io.WriteToBigQuery(
-        #         "{}.{}".format(simulation_result_dataset, simulation_result_table,),
-        #         schema=results_schema_without_samples,
-        #         write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE,
-        #         create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
-        #     )
+        if fortune_teller_config.save_samples == True:
+            # TODO: add support for saving samples
+            pass
+        else:
+            unpacked_simulation_results | "Save {} results to BQ table".format(
+                fortune_teller_config.name
+            ) >> beam.io.WriteToBigQuery(
+                "{}.{}".format(simulation_result_dataset, simulation_result_table,),
+                schema=results_schema_without_samples,
+                write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE,
+                create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
+            )

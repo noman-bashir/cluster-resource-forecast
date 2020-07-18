@@ -32,6 +32,7 @@ message AbstractMetricSelector {
     int64 cpu_usage_percentile = 2;
     bool avg_cpu_usage = 3;
     bool avg_memory_usage = 4;
+    bool max_cpu_usage = 5;
   }
 }
 
