@@ -9,13 +9,17 @@ class _State:
 class AvgPredictor(StatefulPredictor):
     def __init__(self, config, decorated_predictors=None):
         super().__init__(config, decorated_predictors)
-        self.decorated_predictors = decorated_predictors
+        self.cap_to_limit = config.cap_to_limit
 
     def CreateState(self, vm_info):
         return _State()
 
     def UpdateState(self, vm_measure, vm_state):
-        vm_state.total_usage += vm_measure["sample"]["abstract_metrics"]["usage"]
+        limit = vm_measure["sample"]["abstract_metrics"]["limit"]
+        usage = vm_measure["sample"]["abstract_metrics"]["usage"]
+        if self.cap_to_limit == True:
+            usage = min(usage, limit)
+        vm_state.total_usage += usage
 
     def Predict(self, vm_states_and_num_samples):
 
