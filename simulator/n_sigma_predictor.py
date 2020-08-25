@@ -1,11 +1,12 @@
-from predictor import StatefulPredictor
+from simulator.predictor import StatefulPredictor
 from collections import deque
 import numpy as np
 import statistics
 
 
 class _State:
-    def __init__(self):
+    def __init__(self, num_history_samples):
+        self.num_history_samples = num_history_samples
         self.usage = deque(maxlen=self.num_history_samples)
         self.limit = deque(maxlen=self.num_history_samples)
 
@@ -15,12 +16,11 @@ class NSigmaPredictor(StatefulPredictor):
         super().__init__(config, decorated_predictors)
         self.decorated_predictors = decorated_predictors
         self.num_history_samples = config.num_history_samples
-        self.percentile = min(config.percentile, 100)
         self.cap_to_limit = config.cap_to_limit
         self.n = config.n
 
     def CreateState(self, vm_info):
-        return _State()
+        return _State(self.num_history_samples)
 
     def UpdateState(self, vm_measure, vm_state):
         limit = vm_measure["sample"]["abstract_metrics"]["limit"]
@@ -34,14 +34,20 @@ class NSigmaPredictor(StatefulPredictor):
 
         vms_normalized_usages = []
         for vm_state_and_num_sample in vm_states_and_num_samples:
-            normalized_usage = list(vm_state_and_num_sample.vm_state.usage) / list(
-                vm_state_and_num_sample.vm_state.limit
+            normalized_usage = [
+                usage / limit
+                for usage, limit in zip(
+                    list(vm_state_and_num_sample.vm_state.usage),
+                    list(vm_state_and_num_sample.vm_state.limit),
+                )
+            ]
+            vms_normalized_usages.append(
+                np.array(normalized_usage) * vm_state_and_num_sample.vm_state.limit[-1]
             )
-            vms_percentiles.append(normalized_usage)
 
         total_normalized_usage = np.sum(vms_normalized_usages, axis=0)
-        mean = np.mean(total_normalized_usage)
+        mean_usage = np.mean(total_normalized_usage)
         standard_deviation = statistics.stdev(total_normalized_usage)
-        predicted_peak = mean + self.n * standard_deviation
+        predicted_peak = mean_usage + self.n * standard_deviation
 
         return predicted_peak

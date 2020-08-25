@@ -19,6 +19,9 @@ from simulator.fortune_teller import CallFortuneTellerRunner
 from simulator.fortune_teller_factory import PredictorFactory
 from simulator.config_pb2 import SimulationConfig
 from simulator.avg_predictor import AvgPredictor
+from simulator.max_predictor import MaxPredictor
+from simulator.per_vm_percentile_predictor import PerVMPercentilePredictor
+from simulator.n_sigma_predictor import NSigmaPredictor
 
 
 def main(argv=None, save_main_session=True):
@@ -42,7 +45,7 @@ def main(argv=None, save_main_session=True):
     f.close()
 
     # Read Input Data
-    input_data_query = "SELECT * FROM {}.{} ".format(
+    input_data_query = "SELECT * FROM {}.{} WHERE info.machine_id = 71970277442 ".format(
         configs.input.dataset, configs.input.table
     )
     input_data = pipeline | "Query Usage Table" >> beam.io.Read(
@@ -210,6 +213,7 @@ def main(argv=None, save_main_session=True):
 
 
 if __name__ == "__main__":
-    PredictorFactory().RegisterPredictor("avg_predictor", lambda config: AvgPredictor(config))  
+    PredictorFactory().RegisterPredictor("per_vm_percentile_predictor", lambda config: PerVMPercentilePredictor(config))  
+    PredictorFactory().RegisterPredictor("n_sigma_predictor", lambda config: NSigmaPredictor(config))  
     logging.getLogger().setLevel(logging.INFO)
     main()

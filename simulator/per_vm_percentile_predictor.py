@@ -1,10 +1,11 @@
-from predictor import StatefulPredictor
+from simulator.predictor import StatefulPredictor
 from collections import deque
 import numpy as np
 
 
 class _State:
-    def __init__(self):
+    def __init__(self, num_history_samples):
+        self.num_history_samples = num_history_samples
         self.usage = deque(maxlen=self.num_history_samples)
         self.limit = deque(maxlen=self.num_history_samples)
 
@@ -18,7 +19,7 @@ class PerVMPercentilePredictor(StatefulPredictor):
         self.cap_to_limit = config.cap_to_limit
 
     def CreateState(self, vm_info):
-        return _State()
+        return _State(self.num_history_samples)
 
     def UpdateState(self, vm_measure, vm_state):
         limit = vm_measure["sample"]["abstract_metrics"]["limit"]
@@ -32,13 +33,19 @@ class PerVMPercentilePredictor(StatefulPredictor):
 
         vms_percentiles = []
         for vm_state_and_num_sample in vm_states_and_num_samples:
-            normalized_usage = list(vm_state_and_num_sample.vm_state.usage) / list(
-                vm_state_and_num_sample.vm_state.limit
-            )
+            normalized_usage = [
+                usage / limit
+                for usage, limit in zip(
+                    list(vm_state_and_num_sample.vm_state.usage),
+                    list(vm_state_and_num_sample.vm_state.limit),
+                )
+            ]
+
             vms_percentiles.append(
                 np.percentile(np.array(normalized_usage), self.percentile)
+                * vm_state_and_num_sample.vm_state.limit[-1]
             )
 
-        predicted_peak = sum(vms_percentiles)
+        predicted_peak = np.sum(vms_percentiles)
 
         return predicted_peak

@@ -6,6 +6,7 @@ from typing import List
 from simulator.fortune_teller_factory import FortuneTellerFactory
 import sys
 import json
+import logging
 
 
 def _AssignSimulatedMachineIDAsKey(row):
@@ -92,7 +93,7 @@ class _FortuneTeller:
 
 
 def _FortuneTellerRunner(data, fortune_teller):
-    _, streams = data
+    key, streams = data
 
     running_measures = []
     results = []
@@ -101,8 +102,6 @@ def _FortuneTellerRunner(data, fortune_teller):
     streams.append(
         {"simulated_time": np.inf, "simulated_machine": None, "sample": None}
     )
-
-    TIME_STEP_IN_SEC = 300
 
     for index, sample in enumerate(streams):
         if index == 0:
@@ -128,9 +127,7 @@ def _FortuneTellerRunner(data, fortune_teller):
             simulation_result = fortune_teller.UpdateMeasures(
                 current_snapshot=current_snapshot, future_snapshot=future_snapshot
             )
-            horizon = vars(current_snapshot)["measures"][0][
-                "simulated_time"
-            ] + _SecondsToMicroseconds(fortune_teller.horizon + TIME_STEP_IN_SEC)
+            horizon = current_time + _SecondsToMicroseconds(fortune_teller.horizon)
             results.append(simulation_result)
 
     return results
@@ -173,6 +170,8 @@ def CallFortuneTellerRunner(data, config):
         ) >> beam.FlatMap(
             lambda elements: elements
         )
+
+        # unpacked_simulation_results | beam.Map(print)
 
         simulation_result_dataset = config.simulation_result.dataset
         simulation_result_table = (

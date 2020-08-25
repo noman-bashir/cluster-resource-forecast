@@ -74,7 +74,11 @@ class StatefulPredictor(_Predictor):
             if key in self.vm_limits
         )
 
-        predicted_peak = self.Predict(list(self.warm_vms.values()))
+        predicted_peak = (
+            0
+            if not list(self.warm_vms.values())
+            else self.Predict(list(self.warm_vms.values()))
+        )
         total_limit_for_cold_vms = sum(
             self.vm_limits[vm_unique_id] for vm_unique_id in self.cold_vms
         )
