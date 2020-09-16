@@ -60,6 +60,9 @@ message PredictorConfig {
     optional int64 min_num_samples = 1;
     optional bool cap_to_limit = 2;
   }
+  message LimitPredictorConfig {
+    optional int64 min_num_samples = 1;
+  }
   message MaxPredictorConfig {
     optional int64 min_num_samples = 1;
     optional bool cap_to_limit = 2;
@@ -88,6 +91,7 @@ message PredictorConfig {
     MaxDecoratorConfig max_decorator = 4;
     PerVMPercentileConfig per_vm_percentile_predictor = 5;
     NSigmaConfig n_sigma_predictor = 6;
+    LimitPredictorConfig limit_predictor = 7;
   }
 }
 
