@@ -47,7 +47,7 @@ def main(argv=None, save_main_session=True):
     f.close()
 
     # Read Input Data
-    input_data_query = "SELECT * FROM {}.{} WHERE info.machine_id = 71970277442 ".format(
+    input_data_query = "SELECT * FROM {}.{} ".format(
         configs.input.dataset, configs.input.table
     )
     input_data = pipeline | "Query Usage Table" >> beam.io.Read(
