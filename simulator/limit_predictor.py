@@ -20,9 +20,8 @@ class _State:
 
 
 class LimitPredictor(StatefulPredictor):
-    def __init__(self, config, decorated_predictors=None):
-        super().__init__(config, decorated_predictors)
-        self.decorated_predictors = decorated_predictors
+    def __init__(self, config):
+        super().__init__(config)
 
     def CreateState(self, vm_info):
         return _State()

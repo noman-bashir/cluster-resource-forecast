@@ -20,8 +20,8 @@ class _State:
 
 
 class AvgPredictor(StatefulPredictor):
-    def __init__(self, config, decorated_predictors=None):
-        super().__init__(config, decorated_predictors)
+    def __init__(self, config):
+        super().__init__(config)
         self.cap_to_limit = config.cap_to_limit
 
     def CreateState(self, vm_info):

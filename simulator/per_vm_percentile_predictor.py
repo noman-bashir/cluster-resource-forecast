@@ -24,9 +24,8 @@ class _State:
 
 
 class PerVMPercentilePredictor(StatefulPredictor):
-    def __init__(self, config, decorated_predictors=None):
-        super().__init__(config, decorated_predictors)
-        self.decorated_predictors = decorated_predictors
+    def __init__(self, config):
+        super().__init__(config)
         self.num_history_samples = config.num_history_samples
         self.percentile = min(config.percentile, 100)
         self.cap_to_limit = config.cap_to_limit

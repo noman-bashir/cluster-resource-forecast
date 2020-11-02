@@ -36,7 +36,6 @@ from simulator.max_predictor import MaxPredictor
 from simulator.per_vm_percentile_predictor import PerVMPercentilePredictor
 from simulator.per_machine_percentile_predictor import PerMachinePercentilePredictor
 from simulator.n_sigma_predictor import NSigmaPredictor
-from simulator.max_predictor import MaxPredictor
 from simulator.limit_predictor import LimitPredictor
 
 

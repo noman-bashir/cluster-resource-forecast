@@ -1,24 +1,18 @@
-from predictor import StatefulPredictor
+from simulator.predictor import Predictor
 import numpy as np
 
 
-class AvgDecorator(StatefulPredictor):
-    def __init__(self, config, decorated_predictors=None):
-        self.config = config
+class AvgDecorator(Predictor):
+    def __init__(self, config=None, decorated_predictors=None):
         self.decorated_predictors = decorated_predictors
 
-    def CreateState(self, vm_info):
-        pass
 
     def UpdateMeasures(self, snapshot):
         predictions = []
         for predictor in self.decorated_predictors:
             predictions.append(predictor.UpdateMeasures(snapshot))
 
-        return self.Predict(predictions)
-
-    def UpdateState(self, vm_measure, vm_state):
-        pass
+        return self._Predict(predictions)
 
     def Predict(self, predictions):
 

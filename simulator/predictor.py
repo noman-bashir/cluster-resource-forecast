@@ -17,17 +17,19 @@ class _StateAndNumSamples:
         self.vm_num_samples = vm_num_samples
 
 
-class _Predictor:
+class Predictor:
     def __init__(self, config, decorated_predictors=None):
         pass
 
-    def _UpdateMeasures(self, snapshot):
-        pass
+    def UpdateMeasures(self, snapshot):
+        raise NotImplementedError
 
+    def _Predict(self, vmstates):
+        raise NotImplementedError
 
-class StatefulPredictor(_Predictor):
-    def __init__(self, config, decorated_predictors=None):
-        super().__init__(config, decorated_predictors)
+class StatefulPredictor(Predictor):
+    def __init__(self, config):
+        super().__init__(config)
         self.warm_vms = {}
         self.cold_vms = {}
         self.vm_limits = {}
