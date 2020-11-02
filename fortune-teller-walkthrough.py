@@ -1,7 +1,20 @@
+# Copyright 2020 Google LLC.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#    http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from __future__ import absolute_import
 from past.builtins import unicode
 
-from google.protobuf import text_format 
+from google.protobuf import text_format
 import argparse
 import apache_beam as beam
 from apache_beam.options.pipeline_options import PipelineOptions
@@ -21,6 +34,7 @@ from simulator.config_pb2 import SimulationConfig
 from simulator.avg_predictor import AvgPredictor
 from simulator.max_predictor import MaxPredictor
 from simulator.per_vm_percentile_predictor import PerVMPercentilePredictor
+from simulator.per_machine_percentile_predictor import PerMachinePercentilePredictor
 from simulator.n_sigma_predictor import NSigmaPredictor
 from simulator.max_predictor import MaxPredictor
 from simulator.limit_predictor import LimitPredictor
@@ -142,9 +156,7 @@ def main(argv=None, save_main_session=True):
         )
 
     # Calling FortuneTeller Runner
-    CallFortuneTellerRunner(
-        scheduled_samples, configs
-    )
+    CallFortuneTellerRunner(scheduled_samples, configs)
 
     # Saving Filtered Samples
     schema_vmsample_file = open("simulator/schema_vmsample.json")
@@ -215,9 +227,21 @@ def main(argv=None, save_main_session=True):
 
 
 if __name__ == "__main__":
-    PredictorFactory().RegisterPredictor("per_vm_percentile_predictor", lambda config: PerVMPercentilePredictor(config))  
-    PredictorFactory().RegisterPredictor("n_sigma_predictor", lambda config: NSigmaPredictor(config))  
-    PredictorFactory().RegisterPredictor("max_predictor", lambda config: MaxPredictor(config))  
-    PredictorFactory().RegisterPredictor("limit_predictor", lambda config: LimitPredictor(config))  
+    PredictorFactory().RegisterPredictor(
+        "per_vm_percentile_predictor", lambda config: PerVMPercentilePredictor(config)
+    )
+    PredictorFactory().RegisterPredictor(
+        "per_machine_percentile_predictor",
+        lambda config: PerMachinePercentilePredictor(config),
+    )
+    PredictorFactory().RegisterPredictor(
+        "n_sigma_predictor", lambda config: NSigmaPredictor(config)
+    )
+    PredictorFactory().RegisterPredictor(
+        "max_predictor", lambda config: MaxPredictor(config)
+    )
+    PredictorFactory().RegisterPredictor(
+        "limit_predictor", lambda config: LimitPredictor(config)
+    )
     logging.getLogger().setLevel(logging.INFO)
     main()

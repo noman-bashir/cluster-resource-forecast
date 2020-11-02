@@ -1,3 +1,16 @@
+# Copyright 2020 Google LLC.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#    http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from setuptools import find_packages
 from distutils.core import setup
 import os
@@ -39,9 +52,8 @@ def generate_proto(source):
         if subprocess.call(protoc_command) != 0:
             sys.exit(-1)
 
-
-# List of all .proto files
 proto_src = ["simulator/config.proto"]
+
 
 class build_py(_build_py):
     def run(self):
@@ -50,22 +62,18 @@ class build_py(_build_py):
             generate_proto(f)
         _build_py.run(self)
 
+
 class clean(_clean):
     def run(self):
-        # Delete generated files in the code tree.
         for (dirpath, dirnames, filenames) in os.walk("."):
             for filename in filenames:
                 filepath = os.path.join(dirpath, filename)
                 if filepath.endswith("_pb2.py"):
                     os.remove(filepath)
-        # _clean is an old-style class, so super() doesn't work.
         _clean.run(self)
 
-REQUIRED_PACKAGES = [
-    'numpy',
-    'setuptools',
-    'protobuf>=3.12.2'
-]
+
+REQUIRED_PACKAGES = ["numpy", "setuptools", "protobuf>=3.12.2"]
 
 setup(
     name="simulator",
