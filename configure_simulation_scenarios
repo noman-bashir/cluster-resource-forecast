@@ -1,0 +1,6 @@
+config_file=$1
+gcp_region=$2
+
+sudo python fortune-teller-walkthrough.py --config_file $config_file
+--runner DataflowRunner --project eurosys21-artifact --region $gcp_region \
+--temp_location gs://eurosys21-artifact/tmp/ --setup_file ./setup.py

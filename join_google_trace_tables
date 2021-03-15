@@ -1,0 +1,30 @@
+#!/bin/bash
+cell=$1
+start_time_in_sec=$2
+end_time_in_sec=$3
+gcp_region=$4
+output_table_name=$5
+query='SELECT CAST(start_time AS INT64) AS start_time, CAST(end_time AS INT64) AS end_time, collection_id, instance_index, machine_id, COALESCE(alloc_collection_id, 0) AS alloc_collection_id, COALESCE(alloc_instance_index, 0) AS alloc_instance_index, COALESCE(collection_type, 0) AS collection_type, average_usage, maximum_usage, random_sample_usage, assigned_memory, sample_rate, cpu_usage_distribution, tail_cpu_usage_distribution FROM `google.com:google-cluster-data.clusterdata_2019_'
+query+=$cell
+query+='.instance_usage` WHERE start_time >= '
+query+="$start_time_in_sec" 
+query+=' AND start_time < '
+query+="$end_time_in_sec"
+query+=' AND collection_id > 0 AND instance_index > 0 AND machine_id > 0 AND alloc_collection_id = 0'
+# query+="\n" 
+echo $query > user_query.txt
+query=''
+query+='SELECT CAST(time AS INT64) AS time, collection_id, instance_index, COALESCE(scheduling_class, 0) AS scheduling_class, COALESCE(collection_type, 0) AS collection_type, COALESCE(priority, 0) AS priority, COALESCE(alloc_collection_id, 0) AS alloc_collection_id, machine_id, COALESCE(alloc_instance_index, 0) AS alloc_instance_index, resource_request FROM `google.com:google-cluster-data.clusterdata_2019_'
+query+="$cell"
+query+='.instance_events` WHERE time < '
+query+="$end_time_in_sec"
+query+=' AND time >= '
+query+="$start_time_in_sec"
+query+=' AND resource_request.cpus > 0 AND resource_request.memory > 0 AND collection_id > 0 AND instance_index > 0 AND machine_id > 0 AND alloc_collection_id = 0 AND scheduling_class IN (2,3)'
+
+echo $query >> user_query.txt
+
+sudo python simulator-setup-walkthrough.py --input user_query.txt \
+--output eurosys21-artifact:artifact_evaluations.$output_table_name \
+--runner DataflowRunner --project eurosys21-artifact --region $gcp_region \
+--temp_location gs://eurosys21-artifact/tmp/ --setup_file ./setup.py

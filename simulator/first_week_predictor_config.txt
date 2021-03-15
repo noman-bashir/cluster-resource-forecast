@@ -1,0 +1,41 @@
+scheduled_samples {
+  input {
+    dataset: "artifact_evaluations"
+    table: "scheduled_samples_cell_a_first_week"
+  }
+}
+fortune_teller {
+  name: "n_sigma_24_120_5_first_week"
+  save_samples: false
+    predictor {
+      n_sigma_predictor {
+      min_num_samples: 24
+      cap_to_limit: true
+      num_history_samples: 120
+      n: 5
+    }
+  }
+}
+fortune_teller {
+  name: "per_vm_percentile_24_120_5_first_week"
+  save_samples: false
+    predictor {
+      per_vm_percentile_predictor {
+      min_num_samples: 24
+      cap_to_limit: true
+      num_history_samples: 120
+      percentile: 99
+    }
+  }
+}
+fortune_teller {
+  name: "oracle_24h_first_week"
+  save_samples: false
+  oracle {
+    horizon_in_seconds: 86400
+    cap_to_limit: true
+  }
+}
+simulation_result {
+  dataset: "artifact_evaluations"
+}
